@@ -37,3 +37,9 @@
   font-size: 16pt;
   margin: 0px;
 }
+
+td {
+  padding: 10px;
+  text-align: left;
+  border: 1px solid black;
+}

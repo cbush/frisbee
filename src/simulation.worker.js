@@ -1,6 +1,7 @@
 /* eslint-env worker */
 /* eslint no-restricted-globals: 1 */
 import PD from "probability-distributions";
+import { isNumber } from "util";
 
 const simulatePoint = ({
   players,
@@ -16,15 +17,15 @@ const simulatePoint = ({
   let possessor = null;
   let assistant = null;
   while (true) {
-    if (possessor != null || !possessor.isOpponent) {
+    if (possessor != null && !possessor.isOpponent) {
       // Team has the disc
 
       const throwsGoal = PD.sample([true, false], 1, false, [
         possessor.assistRate,
         1 - possessor.assistRate
-      ]);
+      ])[0];
 
-      if (throwsGoal) {
+      if (throwsGoal === true) {
         onGoalScored(possessor.name);
         if (assistant != null) {
           onAssist(assistant.name);
@@ -37,7 +38,7 @@ const simulatePoint = ({
         1 - possessor.throwRate
       ])[0];
 
-      if (!passSuccess) {
+      if (passSuccess === false) {
         onPassIncomplete(possessor.name);
         possessor = null;
         continue;
@@ -50,15 +51,15 @@ const simulatePoint = ({
         team,
         1,
         false,
-        team.map(member => team.targetRate)
+        team.map(member => member.targetRate)
       )[0];
 
       const passCaught = PD.sample([true, false], 1, false, [
         target.catchRate,
         1 - target.catchRate
-      ]);
+      ])[0];
 
-      if (!passCaught) {
+      if (passCaught === false) {
         onDrop(target.name);
         possessor = null;
         continue;
@@ -101,13 +102,17 @@ const simulatePoint = ({
 
 const simulatePoints = config => {
   const points = [];
-  while (points.length < 100) {
+  const { pointCount } = config;
+  if (!isNumber(pointCount)) {
+    throw new Error(`Invalid 'pointCount': ${pointCount}`);
+  }
+  while (points.length < pointCount) {
     points.push(simulatePoint(config));
   }
   return points;
 };
 
-const simulate = ({ team }) => {
+const simulate = ({ team, pointCount }) => {
   const playerStats = {};
   const teamBlockRate = team
     .map(member => member.blockRate)
@@ -127,6 +132,7 @@ const simulate = ({ team }) => {
   team.forEach(
     member =>
       (playerStats[member.name] = {
+        name: member.name,
         goals: 0,
         assists: 0,
         passes: 0,
@@ -137,6 +143,7 @@ const simulate = ({ team }) => {
       })
   );
   simulatePoints({
+    pointCount,
     players,
     team,
     teamBlockRate,
@@ -153,10 +160,11 @@ const simulate = ({ team }) => {
 
 onmessage = event => {
   const startTime = new Date();
-  const result = simulate(event.data);
+  const playerStats = simulate(event.data);
   const endTime = new Date();
   self.postMessage({
     elapsedMs: endTime - startTime,
-    result
+    pointCount: event.data.pointCount,
+    playerStats
   });
 };

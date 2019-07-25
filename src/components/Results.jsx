@@ -1,41 +1,46 @@
 import React from "react";
 import SimulationWorker from "../simulation.worker";
+import { ResultTable } from "./ResultTable";
 
 export class Results extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       error: null,
-      result: null
+      playerStats: null
     };
     this.worker = null;
   }
 
   componentDidUpdate(previousProps) {
-    const { team, teamSize } = this.props;
+    const { team, teamSize, pointCount } = this.props;
     if (previousProps.team.length !== team.length) {
       if (team.length === teamSize) {
         console.log("Running simulation...");
-        this.runSimulation(team);
-      } else if (this.worker != null) {
-        this.worker.terminate();
-        this.worker = null;
+        this.runSimulation({ team, pointCount });
+      } else {
+        if (this.worker != null) {
+          this.worker.terminate();
+          this.worker = null;
+        }
+        if (this.state.result !== null) {
+          this.setState({ result: null });
+        }
       }
     }
   }
 
-  runSimulation = team => {
+  runSimulation = configuration => {
     this.worker = new SimulationWorker();
     this.worker.onmessage = event => {
-      const { result, elapsedMs } = event.data;
-      this.setState({ result, elapsedMs });
+      this.setState({ result: event.data });
       this.worker = null;
     };
     this.worker.onerror = error => {
       this.setState({ error });
       this.worker = null;
     };
-    this.worker.postMessage({ team });
+    this.worker.postMessage(configuration);
   };
 
   render() {
@@ -44,7 +49,7 @@ export class Results extends React.Component {
       return <p>Player(s) needed: {teamSize - team.length}</p>;
     }
 
-    const { error, result, elapsedMs } = this.state;
+    const { error, result } = this.state;
     return (
       <div className="result">
         {error != null ? (
@@ -52,9 +57,12 @@ export class Results extends React.Component {
         ) : result == null ? (
           <p>Calculating...</p>
         ) : (
-          <p>
-            Results: {result} in {elapsedMs}ms
-          </p>
+          <div>
+            <p>
+              Simulated {result.pointCount} points in {result.elapsedMs}ms
+            </p>
+            <ResultTable playerStats={result.playerStats} />
+          </div>
         )}
       </div>
     );

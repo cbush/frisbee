@@ -20,7 +20,7 @@ export const withPlayers = Component => {
       const decoder = new TextDecoder("utf-8");
       const readResult = await reader.read();
       const text = await decoder.decode(readResult.value);
-      return csv().fromString(text);
+      return csv({ checkType: true }).fromString(text);
     };
 
     render() {

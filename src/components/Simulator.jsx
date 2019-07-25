@@ -29,7 +29,7 @@ export const Simulator = withPlayers(({ players }) => {
         playerActionDisabled={false}
       />
       <h1>Results</h1>
-      <Results team={team} teamSize={teamSize} />
+      <Results pointCount={1000} team={team} teamSize={teamSize} />
     </div>
   );
 });
