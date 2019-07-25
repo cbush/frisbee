@@ -15,19 +15,28 @@ export const Simulator = withPlayers(({ players }) => {
       <h1>Bench</h1>
       <Roster
         players={players.filter(player => !isOnTeam(player))}
-        playerActionText="Add to Team"
+        playerActionText="Add to Line"
         playerActionDisabled={team.length === 7}
         onPlayerActionClicked={player => setTeam([...team, player])}
       />
       <h1>Line {teamIsFull ? "(Full)" : ""}</h1>
-      <Roster
-        players={players.filter(player => isOnTeam(player))}
-        playerActionText="Remove from Team"
-        onPlayerActionClicked={player => {
-          setTeam(team.filter(member => member.name !== player.name));
-        }}
-        playerActionDisabled={false}
-      />
+      {team.length === 0 ? (
+        <p>
+          Add players from the Bench{" "}
+          <span role="img" aria-label="Point up">
+            👆
+          </span>
+        </p>
+      ) : (
+        <Roster
+          players={players.filter(player => isOnTeam(player))}
+          playerActionText="Remove from Line"
+          onPlayerActionClicked={player => {
+            setTeam(team.filter(member => member.name !== player.name));
+          }}
+          playerActionDisabled={false}
+        />
+      )}
       <h1>Results</h1>
       <Results pointCount={1000} team={team} teamSize={teamSize} />
     </div>

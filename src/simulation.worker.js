@@ -16,12 +16,14 @@ const simulatePoint = ({
 }) => {
   let possessor = null;
   let assistant = null;
+
+  // Continue until a point is scored
   while (true) {
     if (possessor != null && !possessor.isOpponent) {
       // Team has the disc
 
       const throwsGoal = PD.sample([true, false], 1, false, [
-        possessor.assistRate,
+        possessor.assistRate, // ??? No stat provided for goal rate
         1 - possessor.assistRate
       ])[0];
 
@@ -91,7 +93,7 @@ const simulatePoint = ({
       }
 
       // Team did not block. Opponent has a 1 in N chance to score.
-      const N = 3;
+      const N = 3; // ????
       const opponentScored = PD.rint(1, 0, N - 1)[0] === 0;
       if (opponentScored) {
         break;
