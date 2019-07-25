@@ -1,4 +1,5 @@
 import React from "react";
+import SimulationWorker from "../simulation.worker";
 
 export class Results extends React.Component {
   constructor(props) {
@@ -7,22 +8,34 @@ export class Results extends React.Component {
       error: null,
       result: null
     };
+    this.worker = null;
   }
 
   componentDidUpdate(previousProps) {
     const { team, teamSize } = this.props;
-    if (previousProps.team.length !== team.length && team.length === teamSize) {
-      console.log("Running simulation...");
-      this.runSimulation(team);
+    if (previousProps.team.length !== team.length) {
+      if (team.length === teamSize) {
+        console.log("Running simulation...");
+        this.runSimulation(team);
+      } else if (this.worker != null) {
+        this.worker.terminate();
+        this.worker = null;
+      }
     }
   }
 
   runSimulation = team => {
-    this.worker = new Worker("./simulationWorker.js");
-    this.worker.addEventListener("message", function(e) {
-      console.log("Message from Worker: " + e.data);
-    });
-    this.worker.postMessage(team);
+    this.worker = new SimulationWorker();
+    this.worker.onmessage = event => {
+      const { result, elapsedMs } = event.data;
+      this.setState({ result, elapsedMs });
+      this.worker = null;
+    };
+    this.worker.onerror = error => {
+      this.setState({ error });
+      this.worker = null;
+    };
+    this.worker.postMessage({ team });
   };
 
   render() {
@@ -31,15 +44,17 @@ export class Results extends React.Component {
       return <p>Player(s) needed: {teamSize - team.length}</p>;
     }
 
-    const { error, result } = this.state;
+    const { error, result, elapsedMs } = this.state;
     return (
       <div className="result">
-        {error !== null ? (
+        {error != null ? (
           <p>Error: {error.message}</p>
-        ) : result === null ? (
+        ) : result == null ? (
           <p>Calculating...</p>
         ) : (
-          <p>Results: here</p>
+          <p>
+            Results: {result} in {elapsedMs}ms
+          </p>
         )}
       </div>
     );

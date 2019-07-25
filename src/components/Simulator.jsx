@@ -19,7 +19,7 @@ export const Simulator = withPlayers(({ players }) => {
         playerActionDisabled={team.length === 7}
         onPlayerActionClicked={player => setTeam([...team, player])}
       />
-      <h1>Team {teamIsFull ? "(Full)" : ""}</h1>
+      <h1>Line {teamIsFull ? "(Full)" : ""}</h1>
       <Roster
         players={players.filter(player => isOnTeam(player))}
         playerActionText="Remove from Team"

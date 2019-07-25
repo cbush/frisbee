@@ -12,7 +12,7 @@ export function Player({
     throwRate,
     targetRate,
     catchRate,
-    dsPerPp
+    blockRate
   } = player;
   return (
     <div className="player">
@@ -35,7 +35,7 @@ export function Player({
               <td>{throwRate}</td>
               <td>{targetRate}</td>
               <td>{catchRate}</td>
-              <td>{dsPerPp}</td>
+              <td>{blockRate}</td>
             </tr>
           </tbody>
         </table>
