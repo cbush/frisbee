@@ -1,3 +1,11 @@
+# Frisbee Simulator
+
+A very simple and not very accurate frisbee simulator.
+
+Choose 7 players to form a line. The simulation automatically runs for that line and outputs performance stats.
+
+## Original CRA readme below...
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
