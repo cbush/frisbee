@@ -13,11 +13,24 @@ export class Results extends React.Component {
   }
 
   componentDidUpdate(previousProps) {
-    const { team, teamSize, pointCount } = this.props;
+    const {
+      team,
+      teamSize,
+      pointCount,
+      opponentScoreRate,
+      opponentDropRate,
+      teamBlockRate
+    } = this.props;
     if (previousProps.team.length !== team.length) {
       if (team.length === teamSize) {
         console.log("Running simulation...");
-        this.runSimulation({ team, pointCount });
+        this.runSimulation({
+          team,
+          pointCount,
+          opponentScoreRate,
+          opponentDropRate,
+          teamBlockRate
+        });
       } else {
         if (this.worker != null) {
           this.worker.terminate();
@@ -31,6 +44,9 @@ export class Results extends React.Component {
   }
 
   runSimulation = configuration => {
+    if (this.worker != null) {
+      this.worker.terminate();
+    }
     this.worker = new SimulationWorker();
     this.worker.onmessage = event => {
       this.setState({ result: event.data });

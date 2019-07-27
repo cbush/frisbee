@@ -16,7 +16,7 @@ export const Simulator = withPlayers(({ players }) => {
       <Roster
         players={players.filter(player => !isOnTeam(player))}
         playerActionText="Add to Line"
-        playerActionDisabled={team.length === 7}
+        playerActionDisabled={teamIsFull}
         onPlayerActionClicked={player => setTeam([...team, player])}
       />
       <h1>Line {teamIsFull ? "(Full)" : ""}</h1>
@@ -38,7 +38,14 @@ export const Simulator = withPlayers(({ players }) => {
         />
       )}
       <h1>Results</h1>
-      <Results pointCount={1000} team={team} teamSize={teamSize} />
+      <Results
+        opponentScoreRate={0.9}
+        opponentDropRate={0.1}
+        teamBlockRate={0.1}
+        pointCount={1000}
+        team={team}
+        teamSize={teamSize}
+      />
     </div>
   );
 });

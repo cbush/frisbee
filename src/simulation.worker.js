@@ -3,8 +3,17 @@
 import PD from "probability-distributions";
 import { isNumber } from "util";
 
+const randomBool = probabilityOfTrue => {
+  return PD.sample([true, false], 1, false, [
+    probabilityOfTrue,
+    1 - probabilityOfTrue
+  ])[0];
+};
+
 const simulatePoint = ({
-  players,
+  teamBlockRate,
+  opponentScoreRate,
+  opponentDropRate,
   team,
   onGoalScored,
   onAssist,
@@ -15,30 +24,13 @@ const simulatePoint = ({
   onBlock
 }) => {
   let possessor = null;
-  let assistant = null;
 
   // Continue until a point is scored
   while (true) {
-    if (possessor != null && !possessor.isOpponent) {
+    if (possessor != null) {
       // Team has the disc
 
-      const throwsGoal = PD.sample([true, false], 1, false, [
-        possessor.assistRate, // ??? No stat provided for goal rate
-        1 - possessor.assistRate
-      ])[0];
-
-      if (throwsGoal === true) {
-        onGoalScored(possessor.name);
-        if (assistant != null) {
-          onAssist(assistant.name);
-        }
-        break;
-      }
-
-      const passSuccess = PD.sample([true, false], 1, false, [
-        possessor.throwRate,
-        1 - possessor.throwRate
-      ])[0];
+      const passSuccess = randomBool(possessor.throwRate);
 
       if (passSuccess === false) {
         onPassIncomplete(possessor.name);
@@ -56,10 +48,7 @@ const simulatePoint = ({
         team.map(member => member.targetRate)
       )[0];
 
-      const passCaught = PD.sample([true, false], 1, false, [
-        target.catchRate,
-        1 - target.catchRate
-      ])[0];
+      const passCaught = randomBool(target.catchRate);
 
       if (passCaught === false) {
         onDrop(target.name);
@@ -69,34 +58,50 @@ const simulatePoint = ({
 
       onCatch(target.name);
 
-      // Possession moves to target. Last possessor becomes potential assistant
-      assistant = possessor;
+      const wasGoal = randomBool(possessor.assistRate);
+
+      if (wasGoal === true) {
+        onAssist(possessor.name);
+        onGoalScored(target.name);
+        break;
+      }
+
+      // Possession moves to target.
       possessor = target;
+
+      // Play continues until goal is scored
     } else {
       // Opponent has the disc
 
-      // Clear assist
-      assistant = null;
-
       // Team attempts to block
-      possessor = PD.sample(
-        players,
-        1,
-        false,
-        players.map(player => player.blockRate)
-      )[0];
+      const didBlock = randomBool(teamBlockRate);
 
-      if (!possessor.isOpponent) {
+      if (didBlock === true) {
+        possessor = PD.sample(
+          team,
+          1,
+          false,
+          team.map(member => member.blockRate)
+        )[0];
+
         // Team blocked and gained possession.
         onBlock(possessor.name);
         continue;
       }
 
-      // Team did not block. Opponent has a 1 in N chance to score.
-      const N = 3; // ????
-      const opponentScored = PD.rint(1, 0, N - 1)[0] === 0;
-      if (opponentScored) {
+      // Team did not block.
+      // Opponent has a chance to score.
+      const opponentScored = randomBool(opponentScoreRate);
+      if (opponentScored === true) {
         break;
+      }
+
+      // Opponent has a chance to drop.
+      const opponentDropped = randomBool(opponentDropRate);
+      if (opponentDropped === true) {
+        // Pick a new team member at random to take possession
+        possessor = PD.sample(team, 1)[0];
+        continue;
       }
     }
   }
@@ -114,23 +119,14 @@ const simulatePoints = config => {
   return points;
 };
 
-const simulate = ({ team, pointCount }) => {
+const simulate = ({
+  team,
+  pointCount,
+  teamBlockRate,
+  opponentScoreRate,
+  opponentDropRate
+}) => {
   const playerStats = {};
-  const teamBlockRate = team
-    .map(member => member.blockRate)
-    .reduce((acc, cur) => acc + cur, 0);
-  const players = [
-    ...team,
-    {
-      name: "opponent",
-      assistRate: 0,
-      throwRate: 0,
-      targetRate: 0,
-      catchRate: 0,
-      blockRate: 1 - teamBlockRate,
-      isOpponent: true
-    }
-  ];
   team.forEach(
     member =>
       (playerStats[member.name] = {
@@ -146,9 +142,10 @@ const simulate = ({ team, pointCount }) => {
   );
   simulatePoints({
     pointCount,
-    players,
     team,
     teamBlockRate,
+    opponentScoreRate,
+    opponentDropRate,
     onGoalScored: name => (playerStats[name].goals += 1),
     onAssist: name => (playerStats[name].assists += 1),
     onPassThrown: name => (playerStats[name].passes += 1),
