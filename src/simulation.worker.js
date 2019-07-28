@@ -1,6 +1,7 @@
 /* eslint-env worker */
 /* eslint no-restricted-globals: 1 */
 import PD from "probability-distributions";
+import Stats from "stats-lite";
 import { isNumber } from "util";
 
 const randomBool = probabilityOfTrue => {
@@ -157,13 +158,73 @@ const simulate = ({
   return playerStats;
 };
 
+const getAverage = (results, name, prop) => {
+  return Stats.mean(
+    results.map(playerStats => playerStats[name][prop])
+  ).toFixed(3);
+};
+
+const getStdev = (results, name, prop) => {
+  return Stats.stdev(
+    results.map(playerStats => playerStats[name][prop])
+  ).toFixed(3);
+};
+
+const simulateMulti = ({ iterationCount, ...data }) => {
+  const { team, pointCount } = data;
+  const results = [];
+  for (let i = 0; i < iterationCount; ++i) {
+    results.push(simulate({ ...data, team, pointCount }));
+  }
+  const playerStats = {};
+  team.forEach(member => {
+    const { name } = member;
+    playerStats[name] = {
+      name,
+      goalsAvg: getAverage(results, name, "goals"),
+      goalsStdev: getStdev(results, name, "goals"),
+      assistsAvg: getAverage(results, name, "assists"),
+      assistsStdev: getStdev(results, name, "assists"),
+      passesAvg: getAverage(results, name, "passes"),
+      passesStdev: getStdev(results, name, "passes"),
+      incompletesAvg: getAverage(results, name, "incompletes"),
+      incompletesStdev: getStdev(results, name, "incompletes"),
+      catchesAvg: getAverage(results, name, "catches"),
+      catchesStdev: getStdev(results, name, "catches"),
+      dropsAvg: getAverage(results, name, "drops"),
+      dropsStdev: getStdev(results, name, "drops"),
+      blocksAvg: getAverage(results, name, "blocks"),
+      blocksStdev: getStdev(results, name, "blocks")
+    };
+  });
+  return playerStats;
+};
+
+const getPointCount = ({ pointCount, iterationCount, multiMode }) => {
+  if (!multiMode) {
+    return pointCount;
+  }
+  if (!isNumber(iterationCount) || iterationCount <= 0) {
+    throw new Error(`Invalid iterationCount: ${iterationCount}`);
+  }
+  return parseInt(pointCount / iterationCount);
+};
+
 onmessage = event => {
   const startTime = new Date();
-  const playerStats = simulate(event.data);
+  const { multiMode } = event.data;
+  const pointCount = getPointCount(event.data);
+  let playerStats;
+  if (multiMode === true) {
+    playerStats = simulateMulti({ ...event.data, pointCount });
+  } else {
+    playerStats = simulate({ ...event.data, pointCount });
+  }
   const endTime = new Date();
   self.postMessage({
     elapsedMs: endTime - startTime,
-    pointCount: event.data.pointCount,
+    pointCount,
+    iterationCount: event.data.iterationCount,
     playerStats
   });
 };

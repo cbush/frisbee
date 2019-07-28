@@ -1,5 +1,7 @@
 import React, { useState } from "react";
+import { Checkbox } from "semantic-ui-react";
 import "rc-slider/assets/index.css";
+import "semantic-ui-css/semantic.min.css";
 import { withPlayers } from "./withPlayers";
 import { Roster } from "./Roster";
 import { Results } from "./Results";
@@ -11,6 +13,8 @@ export const Simulator = withPlayers(({ players }) => {
   const [opponentDropRate, setOpponentDropRate] = useState(0.37);
   const [teamBlockRate, setTeamBlockRate] = useState(0.07);
   const [pointCount, setPointCount] = useState(1000);
+  const [multiMode, setMultiMode] = useState(false);
+  const [iterationCount, setIterationCount] = useState(30);
 
   const isOnTeam = player => team.find(member => member.name === player.name);
 
@@ -77,9 +81,29 @@ export const Simulator = withPlayers(({ players }) => {
           max={10000}
           step={25}
         />
+        <div className="configurationSlider">
+          <label>Multi mode</label>
+          <Checkbox
+            toggle
+            checked={multiMode}
+            onChange={() => setMultiMode(!multiMode)}
+          />
+        </div>
+        {multiMode ? (
+          <ConfigurationSlider
+            label="Iteration Count"
+            defaultValue={iterationCount}
+            setValue={setIterationCount}
+            min={1}
+            max={Math.min(100, pointCount)}
+            step={1}
+          />
+        ) : null}
       </div>
       <h1>Results</h1>
       <Results
+        multiMode={multiMode}
+        iterationCount={iterationCount}
         opponentScoreRate={opponentScoreRate}
         opponentDropRate={opponentDropRate}
         teamBlockRate={teamBlockRate}

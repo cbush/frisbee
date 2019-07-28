@@ -47,23 +47,22 @@ td {
 .configurationSlider {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
   margin-bottom: 10px;
 }
 
 .configurationSlider label {
   flex-basis: 100px;
   text-align: right;
+  margin-right: 10px;
 }
 
 .configurationSlider p {
   flex: 1;
-  margin: 0px;
+  margin: 0px 10px;
 }
 
 .slider {
   flex: 1;
-  margin: 0px 10px;
 }
 
 .result {
