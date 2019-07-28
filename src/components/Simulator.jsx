@@ -1,10 +1,15 @@
 import React, { useState } from "react";
+import "rc-slider/assets/index.css";
 import { withPlayers } from "./withPlayers";
 import { Roster } from "./Roster";
 import { Results } from "./Results";
+import { ConfigurationSlider } from "./ConfigurationSlider";
 
 export const Simulator = withPlayers(({ players }) => {
   const [team, setTeam] = useState([]);
+  const [opponentScoreRate, setOpponentScoreRate] = useState(0.9);
+  const [opponentDropRate, setOpponentDropRate] = useState(0.1);
+  const [teamBlockRate, setTeamBlockRate] = useState(0.1);
 
   const isOnTeam = player => team.find(member => member.name === player.name);
 
@@ -37,11 +42,29 @@ export const Simulator = withPlayers(({ players }) => {
           playerActionDisabled={false}
         />
       )}
+      <h1>Configuration</h1>
+      <div className="configuration">
+        <ConfigurationSlider
+          label="Opponent score rate"
+          defaultValue={opponentScoreRate}
+          setValue={setOpponentScoreRate}
+        />
+        <ConfigurationSlider
+          label="Opponent drop rate"
+          defaultValue={opponentDropRate}
+          setValue={setOpponentDropRate}
+        />
+        <ConfigurationSlider
+          label="Team block rate"
+          defaultValue={teamBlockRate}
+          setValue={setTeamBlockRate}
+        />
+      </div>
       <h1>Results</h1>
       <Results
-        opponentScoreRate={0.9}
-        opponentDropRate={0.1}
-        teamBlockRate={0.1}
+        opponentScoreRate={opponentScoreRate}
+        opponentDropRate={opponentDropRate}
+        teamBlockRate={teamBlockRate}
         pointCount={1000}
         team={team}
         teamSize={teamSize}

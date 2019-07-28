@@ -21,7 +21,13 @@ export class Results extends React.Component {
       opponentDropRate,
       teamBlockRate
     } = this.props;
-    if (previousProps.team.length !== team.length) {
+    if (
+      previousProps.team.length !== team.length ||
+      opponentScoreRate !== previousProps.opponentScoreRate ||
+      opponentDropRate !== previousProps.opponentDropRate ||
+      teamBlockRate !== previousProps.teamBlockRate ||
+      pointCount !== previousProps.pointCount
+    ) {
       if (team.length === teamSize) {
         console.log("Running simulation...");
         this.runSimulation({
@@ -47,6 +53,7 @@ export class Results extends React.Component {
     if (this.worker != null) {
       this.worker.terminate();
     }
+    this.setState({ result: null, error: null });
     this.worker = new SimulationWorker();
     this.worker.onmessage = event => {
       this.setState({ result: event.data });

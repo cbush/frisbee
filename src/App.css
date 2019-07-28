@@ -43,3 +43,29 @@ td {
   text-align: left;
   border: 1px solid black;
 }
+
+.configurationSlider {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.configurationSlider label {
+  flex-basis: 100px;
+  text-align: right;
+}
+
+.configurationSlider p {
+  flex: 1;
+  margin: 0px;
+}
+
+.slider {
+  flex: 1;
+  margin: 0px 10px;
+}
+
+.result {
+  min-height: 500px;
+}
