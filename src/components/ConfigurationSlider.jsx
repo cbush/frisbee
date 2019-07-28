@@ -1,6 +1,13 @@
 import React, { useState } from "react";
 import Slider from "rc-slider";
-export const ConfigurationSlider = ({ label, defaultValue, setValue }) => {
+export const ConfigurationSlider = ({
+  label,
+  defaultValue,
+  setValue,
+  min,
+  max,
+  step
+}) => {
   const [displayValue, setDisplayValue] = useState(defaultValue);
   return (
     <div className="configurationSlider">
@@ -8,9 +15,9 @@ export const ConfigurationSlider = ({ label, defaultValue, setValue }) => {
       <Slider
         className="slider"
         defaultValue={defaultValue}
-        min={0}
-        max={1}
-        step={0.01}
+        min={min}
+        max={max}
+        step={step}
         onChange={value => setDisplayValue(value)}
         onAfterChange={setValue}
       />

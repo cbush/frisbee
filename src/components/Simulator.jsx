@@ -10,6 +10,7 @@ export const Simulator = withPlayers(({ players }) => {
   const [opponentScoreRate, setOpponentScoreRate] = useState(0.59);
   const [opponentDropRate, setOpponentDropRate] = useState(0.37);
   const [teamBlockRate, setTeamBlockRate] = useState(0.07);
+  const [pointCount, setPointCount] = useState(1000);
 
   const isOnTeam = player => team.find(member => member.name === player.name);
 
@@ -48,16 +49,33 @@ export const Simulator = withPlayers(({ players }) => {
           label="Opponent score rate"
           defaultValue={opponentScoreRate}
           setValue={setOpponentScoreRate}
+          min={0}
+          max={1}
+          step={0.01}
         />
         <ConfigurationSlider
           label="Opponent drop rate"
           defaultValue={opponentDropRate}
           setValue={setOpponentDropRate}
+          min={0}
+          max={1}
+          step={0.01}
         />
         <ConfigurationSlider
           label="Team block rate"
           defaultValue={teamBlockRate}
           setValue={setTeamBlockRate}
+          min={0}
+          max={1}
+          step={0.01}
+        />
+        <ConfigurationSlider
+          label="Points simulated"
+          defaultValue={pointCount}
+          setValue={setPointCount}
+          min={25}
+          max={10000}
+          step={25}
         />
       </div>
       <h1>Results</h1>
@@ -65,7 +83,7 @@ export const Simulator = withPlayers(({ players }) => {
         opponentScoreRate={opponentScoreRate}
         opponentDropRate={opponentDropRate}
         teamBlockRate={teamBlockRate}
-        pointCount={1000}
+        pointCount={pointCount}
         team={team}
         teamSize={teamSize}
       />
