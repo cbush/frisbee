@@ -200,20 +200,9 @@ const simulateMulti = ({ iterationCount, ...data }) => {
   return playerStats;
 };
 
-const getPointCount = ({ pointCount, iterationCount, multiMode }) => {
-  if (!multiMode) {
-    return pointCount;
-  }
-  if (!isNumber(iterationCount) || iterationCount <= 0) {
-    throw new Error(`Invalid iterationCount: ${iterationCount}`);
-  }
-  return parseInt(pointCount / iterationCount);
-};
-
 onmessage = event => {
   const startTime = new Date();
-  const { multiMode } = event.data;
-  const pointCount = getPointCount(event.data);
+  const { multiMode, pointCount } = event.data;
   let playerStats;
   if (multiMode === true) {
     playerStats = simulateMulti({ ...event.data, pointCount });

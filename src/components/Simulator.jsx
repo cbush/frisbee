@@ -13,6 +13,7 @@ export const Simulator = withPlayers(({ players }) => {
   const [opponentDropRate, setOpponentDropRate] = useState(0.37);
   const [teamBlockRate, setTeamBlockRate] = useState(0.07);
   const [pointCount, setPointCount] = useState(1000);
+  const [pointCountPerIteration, setPointCountPerIteration] = useState(30);
   const [multiMode, setMultiMode] = useState(false);
   const [iterationCount, setIterationCount] = useState(30);
 
@@ -73,14 +74,27 @@ export const Simulator = withPlayers(({ players }) => {
           max={1}
           step={0.01}
         />
-        <ConfigurationSlider
-          label="Points simulated"
-          defaultValue={pointCount}
-          setValue={setPointCount}
-          min={25}
-          max={10000}
-          step={25}
-        />
+        {multiMode ? (
+          <ConfigurationSlider
+            key="pointsPerIteration"
+            label="Points per iteration"
+            defaultValue={pointCountPerIteration}
+            setValue={setPointCountPerIteration}
+            min={1}
+            max={100}
+            step={1}
+          />
+        ) : (
+          <ConfigurationSlider
+            key="pointsSimulated"
+            label="Points simulated"
+            defaultValue={pointCount}
+            setValue={setPointCount}
+            min={25}
+            max={10000}
+            step={25}
+          />
+        )}
         <div className="configurationSlider">
           <label>Multi mode</label>
           <Checkbox
@@ -95,7 +109,7 @@ export const Simulator = withPlayers(({ players }) => {
             defaultValue={iterationCount}
             setValue={setIterationCount}
             min={1}
-            max={Math.min(100, pointCount)}
+            max={100}
             step={1}
           />
         ) : null}
@@ -107,7 +121,7 @@ export const Simulator = withPlayers(({ players }) => {
         opponentScoreRate={opponentScoreRate}
         opponentDropRate={opponentDropRate}
         teamBlockRate={teamBlockRate}
-        pointCount={pointCount}
+        pointCount={multiMode ? pointCountPerIteration : pointCount}
         team={team}
         teamSize={teamSize}
       />
