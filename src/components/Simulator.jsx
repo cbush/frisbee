@@ -7,9 +7,9 @@ import { ConfigurationSlider } from "./ConfigurationSlider";
 
 export const Simulator = withPlayers(({ players }) => {
   const [team, setTeam] = useState([]);
-  const [opponentScoreRate, setOpponentScoreRate] = useState(0.9);
-  const [opponentDropRate, setOpponentDropRate] = useState(0.1);
-  const [teamBlockRate, setTeamBlockRate] = useState(0.1);
+  const [opponentScoreRate, setOpponentScoreRate] = useState(0.59);
+  const [opponentDropRate, setOpponentDropRate] = useState(0.37);
+  const [teamBlockRate, setTeamBlockRate] = useState(0.07);
 
   const isOnTeam = player => team.find(member => member.name === player.name);
 
